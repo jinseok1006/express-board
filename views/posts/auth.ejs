@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app">
+      <form id="authForm" action="/posts/<%= id %>/edit" method="post">
+        <input type="hidden" id="id" value="<%= id %>" />
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="비밀번호"
+        />
+        <button type="submit">제출</button>
+      </form>
+    </div>
+    <script>
+      const authForm = document.getElementById('authForm');
+
+      authForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById('id').value;
+        const password = document.getElementById('password').value;
+        const body = { password };
+
+        fetchData(id, body);
+      });
+
+      async function fetchData(id, body) {
+        const res = await fetch(`/posts/${id}/edit`, {
+          method: 'post',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          const json = await res.json();
+          return alert(json.message);
+        }
+
+        authForm.submit();
+      }
+    </script>
+  </body>
+</html>
