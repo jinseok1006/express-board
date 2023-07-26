@@ -13,28 +13,33 @@
     </div>
     <p><%= post.content %></p>
     <div>
-      <a href="/posts/<%= post.id %>/auth">수정하기</a>
-      <a href="/posts/<%= post.id %>" id="deleteBtn">삭제하기</a>
+      <a href="/posts/<%= post.id %>/auth?action=put">수정하기</a>
+      <a href="/posts/<%= post.id %>/auth?action=delete">삭제하기</a>
     </div>
 
-    <script>
-      const deleteBtn = document.getElementById('deleteBtn');
+    <script type="module">
+      // const deleteBtn = document.getElementById('deleteBtn');
 
-      deleteBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const endPoint = deleteBtn.href;
-        try {
-          const response = await fetch(endPoint, { method: 'delete' });
-          if (!response.ok) {
-            const json = await response.json();
-            return alert(json.message);
-          }
+      // deleteBtn.addEventListener('click', (e) => {
+      //   e.preventDefault();
+      //   const id = deleteBtn.dataset.postId;
+      //   fetchDelete(id);
+      // });
 
-          window.location.href = '/posts';
-        } catch (e) {
-          console.error(e);
-        }
-      });
+      // async function fetchDelete(id) {
+      //   try {
+      //     const response = await fetch(`/posts/${id}`, { method: 'delete' });
+      //     if (!response.ok) {
+      //       const json = await response.json();
+      //       return alert(json.message);
+      //     }
+
+      //     window.location.href = '/posts';
+      //   } catch (e) {
+      //     alert('error ouccred');
+      //     console.error(e);
+      //   }
+      // }
     </script>
   </body>
 </html>

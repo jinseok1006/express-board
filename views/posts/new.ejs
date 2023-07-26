@@ -11,12 +11,36 @@
     </style>
   </head>
   <body>
-    <form action="/posts" method="post">
-      <input type="text" name="title" placeholder="제목" />
-      <input type="text" name="writer" placeholder="작성자" />
-      <textarea name="content" cols="30" rows="10"></textarea>
-      <input type="password" name="password" placeholder="비밀번호" />
+    <form action="/posts" method="post" id="newPostForm">
+      <input type="text" name="title" placeholder="제목" id="title" />
+      <input type="text" name="writer" placeholder="작성자" id="writer" />
+      <textarea name="content" cols="30" rows="10" id="content"></textarea>
+      <input
+        type="password"
+        name="password"
+        placeholder="비밀번호"
+        id="password"
+      />
       <button type="submit">제출하기</button>
     </form>
+
+    <script type="module">
+      const newPostForm = document.getElementById('newPostForm');
+
+      const fields = ['title', 'writer', 'content', 'password'];
+      const formElements = fields.map((field) =>
+        document.getElementById(field)
+      );
+
+      newPostForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        if (formElements.some((element) => !element.value)) {
+          return alert('필드를 전부 채우세요.');
+        }
+
+        newPostForm.submit();
+      });
+    </script>
   </body>
 </html>

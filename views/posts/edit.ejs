@@ -28,7 +28,7 @@
       <button type="submit">제출하기</button>
     </form>
 
-    <script>
+    <script type="module">
       document.getElementById('editForm').addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -42,20 +42,25 @@
       });
 
       async function fetchData(id, payload) {
-        const response = await fetch(`/posts/${id}/`, {
-          method: 'put',
-          body: payload,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        try {
+          const response = await fetch(`/posts/${id}/`, {
+            method: 'put',
+            body: payload,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
 
-        if (!response.ok) {
-          const body = await response.json();
-          return alert(body.message);
+          if (!response.ok) {
+            const body = await response.json();
+            return alert(body.message);
+          }
+
+          location.href = '/posts';
+        } catch (e) {
+          alert('error occuered');
+          console.error(e);
         }
-
-        location.href = '/posts';
       }
     </script>
   </body>
