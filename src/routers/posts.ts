@@ -113,6 +113,27 @@ const authenticatePost = (req: Request, res: Response, next: NextFunction) => {
   res.sendStatus(200);
 };
 
+const createNewComment = (req: Request, res: Response) => {
+  const postId = parseInt(req.params.id);
+  const { writer, content, password } = req.body;
+  const fullIpAddr = req.socket.remoteAddress!;
+  console.log(writer, content, password, fullIpAddr);
+  if (!writer || !content || !password)
+    return res.status(400).json({ message: 'back:필드가 비어있음' });
+  board.addComment(postId, { writer, content, password, fullIpAddr });
+  res.redirect(`/posts/${postId}`);
+};
+
+const deleteComment = (req: Request, res: Response) => {
+  const postId = parseInt(req.params.postId),
+    commentId = parseInt(req.params.commentId);
+  if (!board.deleteComment(postId, commentId))
+    return res.status(400).json({ message: '없는 포스트나 코멘트' });
+  // 세션인증 필요
+  // const [allowedPostId, allowedCommentId] = req.session.allowedComment!;
+  res.sendStatus(204);
+};
+
 router.get('/', renderPostIndex);
 router.post('/', createNewPost);
 router.get('/new', renderNewPostForm);
@@ -125,23 +146,11 @@ router.put('/:id', updatePost);
 router.delete('/:id', deletePost);
 
 router.post('/:id/auth', authenticatePost);
-router.post('/:id/comments', (req, res) => {
-  const postId = parseInt(req.params.id);
-  const { writer, content, password } = req.body;
-  const fullIpAddr = req.socket.remoteAddress!;
-  console.log(writer, content, password, fullIpAddr);
-  if (!writer || !content || !password)
-    return res.status(400).json({ message: 'back:필드가 비어있음' });
-  board.addComment(postId, { writer, content, password, fullIpAddr });
-  res.redirect(`/posts/${postId}`);
-});
+router.post('/:id/comments', createNewComment);
+router.delete('/:postId/comments/:commentId', deleteComment);
 
-router.delete('/:postId/comments/:commentId', (req, res) => {
-  const postId = parseInt(req.params.postId),
-    commentId = parseInt(req.params.commentId);
-  if (!board.deleteComment(postId, commentId))
-    return res.status(400).json({ message: '없는 포스트나 코멘트' });
-  res.sendStatus(204);
-});
+// TODO: 프론트에서 코멘트 세션 주기
+// authenticateComment
+router.post('/:id/comments/:commentId', (req, res) => {});
 
 export default router;
