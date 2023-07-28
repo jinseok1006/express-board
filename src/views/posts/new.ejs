@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      form > input {
+        display: block;
+      }
+      form > textarea {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/posts" method="post" id="newPostForm">
+      <div>
+        <input
+          type="text"
+          name="writer"
+          placeholder="작성자"
+          id="writer"
+          value="ㅇㅇ"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="비밀번호"
+          id="password"
+        />
+      </div>
+      <input type="text" name="title" placeholder="제목" id="title" />
+      <textarea name="content" cols="30" rows="10" id="content"></textarea>
+      <button type="submit">제출하기</button>
+    </form>
+    <script type="module" src="/js/posts/new.js"></script>
+  </body>
+</html>

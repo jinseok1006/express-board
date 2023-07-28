@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app">
+      <form id="authForm">
+        <input type="hidden" id="postId" value="<%= id %>" />
+        <input type="hidden" id="actionType" value="<%= action %>" />
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="비밀번호"
+        />
+        <button type="submit">제출</button>
+      </form>
+      <div>
+        <a href="/posts/<%= id %>">뒤로가기</a>
+      </div>
+    </div>
+
+    <script type="module" src="/js/posts/auth.js"></script>
+  </body>
+</html>

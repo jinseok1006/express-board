@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <%- include('../partials/dateHelper') %>
+    <style>
+      #comment-form {
+        display: flex;
+        gap: 10px;
+      }
+      .comment-info input {
+        display: block;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><%= post.title %></h1>
+    <div style="gap: 3px">
+      <span><%= post.writer %><span>(<%= post.ipAddr %>)</span></span>
+      <span class="date-helper" data-date="<%= post.date %>"></span>
+    </div>
+    <p><%= post.content %></p>
+
+    <div style="margin-top: 50px">
+      <% comments.forEach(comment => { %>
+      <div>
+        <span><%= comment.writer %></span>(<span><%= comment.ipAddr %></span>)
+        <span class="date-helper" data-date="<%= comment.date %>"></span>
+        <a
+          class="comment-delete"
+          href="/posts/<%= post.id %>/comments/<%= comment.id %>"
+          >삭제하기</a
+        >
+        <p><%= comment.content %></p>
+      </div>
+      <% }) %>
+    </div>
+    <!-- 코멘트 입력부분 -->
+    <div>
+      <form
+        id="comment-form"
+        action="/posts/<%= post.id %>/comments"
+        method="post"
+      >
+        <div class="comment-info">
+          <input
+            type="text"
+            id="writer"
+            name="writer"
+            placeholder="writer"
+            value="ㅇㅇ"
+          />
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="password"
+          />
+        </div>
+        <textarea id="content" cols="60" rows="4" name="content"></textarea>
+        <button type="submit">제출</button>
+      </form>
+    </div>
+
+    <div>
+      <a href="/posts">목록으로</a>
+      <a href="/posts/<%= post.id %>/auth?action=put">수정하기</a>
+      <a href="/posts/<%= post.id %>/auth?action=delete">삭제하기</a>
+    </div>
+  </body>
+
+  <script type="module">
+    const fields = ['writer', 'password', 'content'];
+    const elements = fields.map((field) => document.getElementById(field));
+    const commentForm = document.getElementById('comment-form');
+
+    commentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (elements.some((element) => !element.value)) {
+        return alert('front:필드를 전부 채우세요.');
+      }
+
+      commentForm.submit();
+    });
+  </script>
+  <script type="module">
+    const commentDeleteBtns = document.querySelectorAll('.comment-delete');
+    commentDeleteBtns.forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const endPoint = e.target.href;
+        if (!confirm('front:삭제하면 되돌릴 수 없습니다.')) {
+          return;
+        }
+        const response = await fetch(endPoint, { method: 'delete' });
+        if (!response.ok) {
+          const error = await response.json();
+          return alert(error.message);
+        }
+        window.location.reload();
+      });
+    });
+  </script>
+</html>

@@ -4,13 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <%- include('../partials/dateHelper') %>
   </head>
   <body>
     <ul>
       <% posts.forEach(post => { %>
       <li>
-        <a href="/posts/<%= post.id %>"><%= post.title %></a> (<%= post.writer
-        %>) <%= post.date %>
+        <a href="/posts/<%= post.id %>"><%= post.title %></a> <%= post.writer
+        %><span>(<%= post.ipAddr %>)</span>
+        <span class="date-helper" data-date="<%= post.date %>"></span>
       </li>
       <% }) %>
     </ul>
