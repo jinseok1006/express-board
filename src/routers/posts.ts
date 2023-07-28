@@ -1,9 +1,7 @@
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
-import { BoardModel, IPost } from '../models/boardModel';
-import { postUtils, commentUtils } from '../utils/boardUtil';
+import { BoardModel } from '../models/boardModel';
 import contains from '../utils/contains';
-import '../../typings/session-aggregation';
 
 const router = express.Router();
 const board = new BoardModel();

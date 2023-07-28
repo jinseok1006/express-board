@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import morgan from 'morgan';
 import session from 'express-session';
-import router from './routers/posts';
+import router from './routers';
 
 import { sessionSecret } from '../.credential';
 
@@ -30,10 +30,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.resolve(__dirname, './views'));
 
 // router
-app.get('/', (req, res) => {
-  res.render('index');
-});
-app.use('/posts', router);
+app.use(router);
 
 // error
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

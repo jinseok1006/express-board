@@ -23,7 +23,7 @@ export interface IComment {
 
 export class BoardModel {
   private postId: number; // 각 게시물의 고유 아이디
-  private posts: IPost[]; // 게시물마다 댓글의 고유 아이디
+  private posts: IPost[]; // commentId: 게시물마다 댓글의 고유 아이디
   constructor() {
     this.posts = [
       {

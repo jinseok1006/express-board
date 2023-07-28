@@ -11,5 +11,9 @@
     "express-session": "^1.17.3",
     "morgan": "^1.10.0"
   },
+  "scripts": {
+    "build": "tsc &&cp -r public dist/public&&cp -r src/views dist/src/views",
+    "dist": "scp -r dist/* package*.json jinseok@3.34.97.153:express-board"
+  },
   "main": "www.ts"
 }
