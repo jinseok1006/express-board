@@ -1,17 +1,15 @@
-import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
-import { BoardModel } from '../models/boardModel';
+import { BoardModel } from '../models/board.model';
 import contains from '../utils/contains';
 
-const router = express.Router();
 const board = new BoardModel();
 
-const renderPostIndex = (req: Request, res: Response) => {
+export const renderPostIndex = (req: Request, res: Response) => {
   const posts = board.getAllPosts();
   res.render('posts/index', { posts });
 };
 
-const createNewPost = (req: Request, res: Response) => {
+export const createNewPost = (req: Request, res: Response) => {
   const { title, writer, content, password } = req.body;
   const fullIpAddr = req.socket.remoteAddress!;
 
@@ -23,11 +21,15 @@ const createNewPost = (req: Request, res: Response) => {
   res.redirect('/posts');
 };
 
-const renderNewPostForm = (req: Request, res: Response) => {
+export const renderNewPostForm = (req: Request, res: Response) => {
   res.render('posts/new');
 };
 
-const renderPostById = (req: Request, res: Response, next: NextFunction) => {
+export const renderPostById = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const id = parseInt(req.params.id);
   const post = board.getPostById(id);
 
@@ -35,7 +37,7 @@ const renderPostById = (req: Request, res: Response, next: NextFunction) => {
   res.render('posts/post', { post, comments: post.comments });
 };
 
-const renderEditPostForm = (
+export const renderEditPostForm = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -51,7 +53,7 @@ const renderEditPostForm = (
   res.render('posts/edit', { post });
 };
 
-const updatePost = (req: Request, res: Response) => {
+export const updatePost = (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const post = board.getPostById(id);
   if (!post) {
@@ -69,7 +71,11 @@ const updatePost = (req: Request, res: Response) => {
   res.sendStatus(200);
 };
 // 세션을 만들기 위한 폼 렌더
-const renderAuthForm = (req: Request, res: Response, next: NextFunction) => {
+export const renderAuthForm = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const id = parseInt(req.params.id);
   const action = req.query.action as string;
   const ACTIONS = ['put', 'delete'] as const;
@@ -80,10 +86,11 @@ const renderAuthForm = (req: Request, res: Response, next: NextFunction) => {
   if (!contains(ACTIONS, action)) {
     return res.status(400).json({ message: '액션타입이 올바르지 않음' });
   }
+
   res.render('posts/auth', { id, action });
 };
 
-const deletePost = (req: Request, res: Response, next: NextFunction) => {
+export const deletePost = (req: Request, res: Response, next: NextFunction) => {
   const id = parseInt(req.params.id);
 
   const post = board.getPostById(id);
@@ -97,7 +104,11 @@ const deletePost = (req: Request, res: Response, next: NextFunction) => {
   res.sendStatus(204);
 };
 
-const authenticatePost = (req: Request, res: Response, next: NextFunction) => {
+export const authenticatePost = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const postId = parseInt(req.params.id);
   const password = req.body.password;
 
@@ -113,44 +124,52 @@ const authenticatePost = (req: Request, res: Response, next: NextFunction) => {
   res.sendStatus(200);
 };
 
-const createNewComment = (req: Request, res: Response) => {
+export const createNewComment = (req: Request, res: Response) => {
   const postId = parseInt(req.params.id);
   const { writer, content, password } = req.body;
   const fullIpAddr = req.socket.remoteAddress!;
-  console.log(writer, content, password, fullIpAddr);
   if (!writer || !content || !password)
     return res.status(400).json({ message: 'back:필드가 비어있음' });
   board.addComment(postId, { writer, content, password, fullIpAddr });
   res.redirect(`/posts/${postId}`);
 };
 
-const deleteComment = (req: Request, res: Response) => {
+export const deleteComment = (req: Request, res: Response) => {
   const postId = parseInt(req.params.postId),
     commentId = parseInt(req.params.commentId);
+  // 세션인증 필요
+  const allowedComment = req.session.allowedComment;
+  if (!allowedComment) return res.status(403).json({ message: '권한이 없음' });
+  const [allowedPostId, allowedCommentId] = allowedComment;
+
+  if (allowedPostId !== postId || allowedCommentId !== commentId) {
+    return res.status(403).json({ message: '허용된 권한이 일치하지 않음' });
+  }
+  //삭제
   if (!board.deleteComment(postId, commentId))
     return res.status(400).json({ message: '없는 포스트나 코멘트' });
-  // 세션인증 필요
-  // const [allowedPostId, allowedCommentId] = req.session.allowedComment!;
+  // TODO:세션파괴
+
   res.sendStatus(204);
 };
 
-router.get('/', renderPostIndex);
-router.post('/', createNewPost);
-router.get('/new', renderNewPostForm);
+export const authenticateComment = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const postId = parseInt(req.params.postId),
+    commentId = parseInt(req.params.commentId);
+  const { password } = req.body;
+  // postId와 commentId를 이용해서 해당하는 코멘트를 찾는다
+  // 해당 코멘트의 비밀번호를 비교해야함
+  const comment = board.getCommentById(postId, commentId);
+  if (!comment) return next();
 
-router.get('/:id/edit', renderEditPostForm);
-router.get('/:id', renderPostById);
-router.get('/:id/auth', renderAuthForm);
+  console.log(comment.password, password);
+  if (comment.password != password)
+    return res.status(400).json({ message: '비밀번호가 올바르지 않음.' });
 
-router.put('/:id', updatePost);
-router.delete('/:id', deletePost);
-
-router.post('/:id/auth', authenticatePost);
-router.post('/:id/comments', createNewComment);
-router.delete('/:postId/comments/:commentId', deleteComment);
-
-// TODO: 프론트에서 코멘트 세션 주기
-// authenticateComment
-router.post('/:id/comments/:commentId', (req, res) => {});
-
-export default router;
+  req.session.allowedComment = [postId, commentId];
+  res.sendStatus(200);
+};

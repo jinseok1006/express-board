@@ -87,9 +87,13 @@ export class BoardModel {
   }
 
   getCommentsByPostId(postId: number): IComment[] | undefined {
-    const postIndex = this.posts.findIndex((post) => post.id === postId);
-    if (postIndex === -1) return undefined;
-    return this.posts[postIndex].comments;
+    const post = this.posts.find((post) => post.id === postId);
+    return post?.comments;
+  }
+  getCommentById(postId: number, commentId: number): IComment | undefined {
+    const post = this.posts.find((post) => post.id === postId);
+    const comment = post?.comments.find((comment) => comment.id === commentId);
+    return comment;
   }
 
   addComment(postId: number, inputComment: InputComment): boolean {

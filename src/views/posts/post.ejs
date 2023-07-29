@@ -17,21 +17,21 @@
     </style>
   </head>
   <body>
-    <h1><%= post.title %></h1>
-    <div style="gap: 3px">
-      <span><%= post.writer %><span>(<%= post.ipAddr %>)</span></span>
-      <span class="date-helper" data-date="<%= post.date %>"></span>
+    <div id="post" data-post-id="<%= post.id %>">
+      <h1><%= post.title %></h1>
+      <div style="gap: 3px">
+        <span><%= post.writer %><span>(<%= post.ipAddr %>)</span></span>
+        <span class="date-helper" data-date="<%= post.date %>"></span>
+      </div>
+      <p><%= post.content %></p>
     </div>
-    <p><%= post.content %></p>
 
     <div style="margin-top: 50px">
       <% comments.forEach(comment => { %>
       <div>
         <span><%= comment.writer %></span>(<span><%= comment.ipAddr %></span>)
         <span class="date-helper" data-date="<%= comment.date %>"></span>
-        <a
-          class="comment-delete"
-          href="/posts/<%= post.id %>/comments/<%= comment.id %>"
+        <a href="#" class="comment-delete" data-comment-id="<%= comment.id %>"
           >삭제하기</a
         >
         <p><%= comment.content %></p>
@@ -87,21 +87,49 @@
     });
   </script>
   <script type="module">
+    const postId = parseInt(document.getElementById('post').dataset.postId);
     const commentDeleteBtns = document.querySelectorAll('.comment-delete');
     commentDeleteBtns.forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.preventDefault();
-        const endPoint = e.target.href;
-        if (!confirm('front:삭제하면 되돌릴 수 없습니다.')) {
+        const commentId = parseInt(e.target.dataset.commentId);
+        if (!(await getSession(postId, commentId))) {
           return;
         }
-        const response = await fetch(endPoint, { method: 'delete' });
-        if (!response.ok) {
-          const error = await response.json();
-          return alert(error.message);
-        }
-        window.location.reload();
+        await requestDelete(postId, commentId);
       });
     });
+
+    async function getSession(postId, commentId) {
+      const password = prompt('비밀번호를 입력하세요');
+
+      const response = await fetch(`/posts/${postId}/comments/${commentId}`, {
+        method: 'post',
+        body: JSON.stringify({ password }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.message);
+        return false;
+      }
+
+      return true;
+    }
+
+    async function requestDelete(postId, commentId) {
+      const response = await fetch(`/posts/${postId}/comments/${commentId}`, {
+        method: 'delete',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        return alert(error.message);
+      }
+      alert('삭제되었습니다.');
+      window.location.reload();
+    }
   </script>
 </html>
